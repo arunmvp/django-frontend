@@ -25,7 +25,7 @@ const NewsletterFooter = () => {
       setLoading(true);
       setMessage("");
       // 🔹 API call backend ku (example endpoint)
-      await axios.post("http://127.0.0.1:8000/api/subscribe/", { email });
+      await axios.post("https://django-ecommerce-95xj.onrender.com/api/subscribe/", { email });
       setMessage("Subscribed!");
     //   setEmail("");
         setRead(true)

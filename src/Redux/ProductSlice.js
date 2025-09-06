@@ -4,7 +4,7 @@ import axios from "axios";
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async () => {
-    const res = await axios.get("http://127.0.0.1:8000/api/products/");
+    const res = await axios.get("https://django-ecommerce-95xj.onrender.com/api/products/");
     
     return res.data;
   }

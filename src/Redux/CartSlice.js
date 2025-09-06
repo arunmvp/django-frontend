@@ -8,7 +8,7 @@ export const fetchCart = createAsyncThunk(
     // const token = getState().auth.access;
     const token = localStorage.getItem("access");
     console.log("Token being sent:", token);
-    const res = await axios.get("http://127.0.0.1:8000/api/cart/", {
+    const res = await axios.get("https://django-ecommerce-95xj.onrender.com/api/cart/", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -24,7 +24,7 @@ export const addToCart = createAsyncThunk(
     const token = localStorage.getItem("access");
     console.log("Token being sent:", token, product_id, quantity); 
     const res = await axios.post(
-      "http://127.0.0.1:8000/api/cart/add/",
+      "https://django-ecommerce-95xj.onrender.com/api/cart/add/",
       { product_id, quantity },
       {
         headers: {
@@ -43,7 +43,7 @@ export const updateQuantity = createAsyncThunk(
     // const token = getState().auth.access;
     const token = localStorage.getItem("access");
     const res = await axios.post(
-      `http://127.0.0.1:8000/api/cart/${id}/update_quantity/`,
+      `https://django-ecommerce-95xj.onrender.com/api/cart/${id}/update_quantity/`,
       { quantity },
       {
         headers: {
