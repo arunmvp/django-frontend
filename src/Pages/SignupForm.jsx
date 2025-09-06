@@ -21,7 +21,7 @@ const SignupForm = () => {
   const handlesubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/register/", data);
+      const res = await axios.post("https://django-ecommerce-95xj.onrender.com/api/register/", data);
        localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
       localStorage.setItem("username", data.username);
