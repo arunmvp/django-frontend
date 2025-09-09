@@ -7,6 +7,8 @@
 @import "swiper/css/navigation";
 @import "swiper/css/pagination";
 
+
+
 /* Hide default Swiper arrow icons */
 .swiper-button-next::after,
 .swiper-button-prev::after {

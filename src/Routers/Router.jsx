@@ -6,7 +6,8 @@ import Navbar from '../Components/Navbar/Navbar';
 import SignupForm from '../Pages/SignupForm';
 import LoginForm from '../Pages/LoginForm';
 import NewsletterFooter from '../Components/Footer/NewsletterFooter';
-
+import Contact  from '../Pages/Contact';
+import About from '../Pages/About';
 const Router = () => {
   return (
     <BrowserRouter>
@@ -16,6 +17,9 @@ const Router = () => {
             <Route path='/' element={<Home/>}/>
             <Route path='/signup' element={<SignupForm/>}/>
             <Route path='/login' element={<LoginForm/>}/>
+            <Route path='/contact' element={<Contact/>}/>
+            <Route path='/About' element={<About/>}/>
+
         </Routes>
         <NewsletterFooter/>
         <Footer/>

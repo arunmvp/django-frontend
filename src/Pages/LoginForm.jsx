@@ -1,36 +1,54 @@
 import axios from "axios";
-import React from "react";
-import { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const { setIsLoggedIn } = useContext(AuthContext);
+
   const [data, setData] = useState({
     username: "",
     password: "",
   });
 
-  const { setIsLoggedIn } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false); // <-- loading state
+  const [error, setError] = useState(""); // <-- error message
 
   const handlechange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
+    setError(""); // clear error on typing
   };
 
   const handlesubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
-      const res = await axios.post("https://django-ecommerce-95xj.onrender.com/api/login/", data);
+      const res = await axios.post(
+        "https://django-ecommerce-95xj.onrender.com/api/login/",
+        data
+      );
+
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
       localStorage.setItem("username", data.username);
-      setIsLoggedIn(true); // <-- update Navbar instantly
+
+      setIsLoggedIn(true);
       navigate("/");
-    } catch (error) {
-      console.log(error.response?.data || error.message);
-      alert("Login failed!");
+    } catch (err) {
+      console.log(err.response?.data || err.message);
+
+      // check Django error
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail); // example: "No active account found with the given credentials"
+      } else {
+        setError("Login failed! Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,7 +62,7 @@ const LoginForm = () => {
 
         {/* Form */}
         <form onSubmit={handlesubmit} className="space-y-5">
-          {/* Email */}
+          {/* Username */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Username
@@ -55,7 +73,9 @@ const LoginForm = () => {
               required
               onChange={handlechange}
               placeholder="your username"
-              className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              className={`mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none ${
+                error ? "border-red-500" : ""
+              }`}
             />
           </div>
 
@@ -70,9 +90,14 @@ const LoginForm = () => {
               required
               onChange={handlechange}
               placeholder="••••••••"
-              className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              className={`mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none ${
+                error ? "border-red-500" : ""
+              }`}
             />
           </div>
+
+          {/* Error message */}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
           {/* Remember Me */}
           <div className="flex items-center">
@@ -89,12 +114,42 @@ const LoginForm = () => {
             </label>
           </div>
 
-          {/* Button */}
+          {/* Button with loading */}
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-[#e47277] to-[#ea888d] text-white py-2 rounded-lg shadow-md hover:from-[#f99a9f] hover:to-[#e47277] transition"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-[#e47277] to-[#ea888d] text-white py-2 rounded-lg shadow-md hover:from-[#f99a9f] hover:to-[#e47277] transition flex items-center justify-center gap-2"
           >
-            Log in
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  />
+                </svg>
+                Logging in...
+              </>
+            ) : (
+              <>
+                <ShoppingCartIcon fontSize="small" />
+                Log in
+              </>
+            )}
           </button>
         </form>
 
