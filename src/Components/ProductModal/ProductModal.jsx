@@ -65,7 +65,7 @@ const ProductModal = ({ open, handleClose, product }) => {
       onClose={handleClose}
       fullWidth
       maxWidth="md"
-      PaperProps={{ style: { borderRadius: "16px", overflow: "hidden" } }}
+      PaperProps={{ style: { borderRadius: "7px", overflow: "hidden" } }}
       BackdropProps={{
         style: {
           backdropFilter: "blur(6px)",

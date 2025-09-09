@@ -1,6 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { FaShoppingCart, FaUserCircle, FaBars, FaTimes, FaSearch } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useContext } from "react";
+import {
+  FaShoppingCart,
+  FaUserCircle,
+  FaBars,
+  FaTimes,
+  FaSearch,
+} from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCart } from "../../Redux/CartSlice"; // 🛒 Redux slice
 import { AuthContext } from "../../Context/AuthContext";
@@ -14,9 +20,10 @@ const Navbar = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
-  const { isLoggedIn, setIsLoggedIn } = React.useContext(AuthContext);
+  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   const [username, setUsername] = useState("");
 
   const { items } = useSelector((state) => state.cart);
@@ -52,36 +59,50 @@ const Navbar = () => {
     }
   };
 
+  // active link check
+  const isActive = (path) => {
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.startsWith(path);
+  };
+
+  const menuItems = ["Home", "Products", "About", "Contact"];
+
   return (
     <nav className="bg-white text-black shadow-md px-6 py-4 flex justify-between items-center sticky top-0 w-full z-50">
       {/* Logo */}
       <div
         className="flex items-center cursor-pointer"
         onClick={() => navigate("/")}
-      >
+      > 
         <img src={logo} alt="Logo" className="h-8" />
       </div>
 
       {/* Desktop Menu */}
       <ul className="hidden md:flex gap-8 font-medium items-center">
-        {["Home", "Products", "About", "Contact"].map((item) => (
-          <li
-            key={item}
-            className="hover:text-[#E47277] transition-colors duration-300 cursor-pointer"
-            onClick={() => navigate(item === "Home" ? "/" : `/${item.toLowerCase()}`)}
-          >
-            {item}
-          </li>
-        ))}
+        {menuItems.map((item) => {
+          const path = item === "Home" ? "/" : `/${item.toLowerCase()}`;
+          
+          return (
+            <li
+              key={item}
+              className={`cursor-pointer transition-colors duration-300 hover:text-[#E47277] ${ 
+                isActive(path) ? "text-[#E47277]" : ""
+              }`}
+              onClick={() => navigate(path)}
+            >
+              {item}
+            </li>
+          );
+        })}
 
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="relative ml-4">
           <input
             type="text"
             placeholder="Search products..."
-            className="peer w-64 md:w-80 py-2 pl-4 pr-12 rounded-full border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#E47277] transition-all"
+            className="peer w-64 md:w-80 py-2 pl-4 pr-12 rounded-full font-light border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#E47277] transition-all"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)} 
           />
           <button
             type="submit"
@@ -165,10 +186,14 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="absolute top-16 left-0 w-full bg-white flex flex-col items-center gap-6 py-6 text-lg font-medium md:hidden border-t border-gray-200">
-          {["Home", "Products", "About", "Contact"].map((item) => (
+          {menuItems.map((item) => (
             <p
               key={item}
-              className="hover:text-[#E47277] cursor-pointer transition-colors"
+              className={`cursor-pointer hover:text-[#E47277] transition-colors ${
+                isActive(item === "Home" ? "/" : `/${item.toLowerCase()}`)
+                  ? "text-[#E47277]"
+                  : ""
+              }`}
               onClick={() => navigate(item === "Home" ? "/" : `/${item.toLowerCase()}`)}
             >
               {item}
