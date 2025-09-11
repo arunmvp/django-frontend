@@ -1,15 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaTrash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-import { updateQuantity } from "../../Redux/CartSlice";
+import { updateQuantity, removeFromCart } from "../../Redux/CartSlice";
 
 const CartDrawer = ({ isOpen, onClose, cartItems }) => {
   const dispatch = useDispatch();
+  const [loadingItems, setLoadingItems] = useState([]); // track which product is loading
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden"; // prevent scroll
+      document.body.style.overflow = "hidden"; 
     } else {
       document.body.style.overflow = "auto";
     }
@@ -24,21 +25,37 @@ const CartDrawer = ({ isOpen, onClose, cartItems }) => {
     0
   );
 
+  const triggerLoading = (id, action) => {
+    setLoadingItems((prev) => [...prev, id]); // mark as loading
+    setTimeout(() => {
+      action(); // perform redux action after 1s
+      setLoadingItems((prev) => prev.filter((itemId) => itemId !== id));
+    }, 1000);
+  };
+
   const handleIncrement = (item) => {
-    dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }));
+    triggerLoading(item.id, () =>
+      dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }))
+    );
   };
 
   const handleDecrement = (item) => {
     if (item.quantity > 1) {
-      dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1 }));
+      triggerLoading(item.id, () =>
+        dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1 }))
+      );
     }
+  };
+
+  const handleRemove = (id) => {
+    triggerLoading(id, () => dispatch(removeFromCart(id)));
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Overlay with blur */}
+          {/* Overlay */}
           <motion.div
             className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40"
             initial={{ opacity: 0 }}
@@ -67,49 +84,74 @@ const CartDrawer = ({ isOpen, onClose, cartItems }) => {
             {/* Items */}
             <div className="flex-1 overflow-y-auto p-4">
               {cartItems.length > 0 ? (
-                cartItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between mb-4 border-b pb-2"
-                  >
-                    {/* Product Info */}
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={item.product.image}
-                        alt={item.product.title}
-                        className="w-14 h-14 object-cover rounded" 
-                      />
-                      <div>
-                        <h4 className="text-sm w-[160px] font-medium  mb-2">
-                          {item.product.title}
-                        </h4>
-                        <div className="flex items-center gap-0 border w-[85px]  rounded">
-                        <button
-                          onClick={() => handleDecrement(item)}
-                          className="px-2 py-0 border-r "
-                        >
-                          -
-                        </button>
-                        <span className="px-3 font-light">{item.quantity}</span>
-                        <button
-                          onClick={() => handleIncrement(item)}
-                          className="px-2 py-0 border-l"
-                        >
-                          +
-                        </button>
-                      </div>
-                      </div>
-                    </div>
+                cartItems.map((item) => {
+                  const isLoading = loadingItems.includes(item.id);
+                  return (
+                    <div
+                      key={item.id}
+                      className={`relative flex items-center justify-between mb-4 border-b pb-2 transition ${
+                        isLoading ? "opacity-90 blur-[0.5px]" : ""
+                      }`}
+                    >
+                      {/* Loading Overlay */}
+                      {isLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
+                          <div className="w-6 h-6 border-2 border-[#E47277] border-t-transparent rounded-full animate-spin opacity-100"></div>
+                        </div>
+                      )}
 
-                    {/* Qty Controls + Subtotal */}
-                    <div className="flex flex-col items-end">
-                      
-                      <p className="text-sm mt-1 font-thin">
-                        Subtotal: <span className="font-normal">${item.product.price * item.quantity}.00</span>
-                      </p>
+                      {/* Product Info */}
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={item.product.image}
+                          alt={item.product.title}
+                          className="w-14 h-14 object-cover rounded"
+                        />
+                        <div>
+                          <h4 className="text-sm w-[160px] font-medium mb-2">
+                            {item.product.title}
+                          </h4>
+                          <div className="flex items-center gap-0 border w-[85px] rounded">
+                            <button
+                              onClick={() => handleDecrement(item)}
+                              disabled={isLoading}
+                              className="px-2 py-0 border-r"
+                            >
+                              -
+                            </button>
+                            <span className="px-3 font-light">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => handleIncrement(item)}
+                              disabled={isLoading}
+                              className="px-2 py-0 border-l"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Subtotal + Remove */}
+                      <div className="flex flex-col items-end">
+                        <p className="text-sm mt-1 font-thin">
+                          Subtotal:{" "}
+                          <span className="font-normal">
+                            ₹{item.product.price * item.quantity}.00
+                          </span>
+                        </p>
+                        <button
+                          onClick={() => handleRemove(item.id)}
+                          disabled={isLoading}
+                          className="flex items-center gap-1 text-red-500 text-xs mt-2 hover:underline"
+                        >
+                          <FaTrash /> Remove
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-gray-500 text-center mt-10">
                   Your cart is empty 🛒
