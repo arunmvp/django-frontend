@@ -8,6 +8,7 @@ import LoginForm from '../Pages/LoginForm';
 import NewsletterFooter from '../Components/Footer/NewsletterFooter';
 import Contact  from '../Pages/Contact';
 import About from '../Pages/About';
+import Checkout from '../Components/CartDrawer/Checkout';
 const Router = () => {
   return (
     <BrowserRouter>
@@ -19,6 +20,7 @@ const Router = () => {
             <Route path='/login' element={<LoginForm/>}/>
             <Route path='/contact' element={<Contact/>}/>
             <Route path='/About' element={<About/>}/>
+            <Route path='/checkout' element={<Checkout/>}/>
 
         </Routes>
         <NewsletterFooter/>

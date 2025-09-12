@@ -6,11 +6,11 @@ import { updateQuantity, removeFromCart } from "../../Redux/CartSlice";
 
 const CartDrawer = ({ isOpen, onClose, cartItems }) => {
   const dispatch = useDispatch();
-  const [loadingItems, setLoadingItems] = useState([]); // track which product is loading
+  const [loadingItems, setLoadingItems] = useState([]); // track remove loading
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden"; 
+      document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
@@ -25,30 +25,32 @@ const CartDrawer = ({ isOpen, onClose, cartItems }) => {
     0
   );
 
-  const triggerLoading = (id, action) => {
-    setLoadingItems((prev) => [...prev, id]); // mark as loading
+  // 🔄 Remove Loading
+  const triggerRemoveLoading = (id, action) => {
+    if (loadingItems.includes(id)) return;
+
+    setLoadingItems((prev) => [...prev, id]);
     setTimeout(() => {
-      action(); // perform redux action after 1s
+      action(); // perform redux action AFTER 1s
       setLoadingItems((prev) => prev.filter((itemId) => itemId !== id));
     }, 1000);
   };
 
+  // ➕ Increment (NO loading)
   const handleIncrement = (item) => {
-    triggerLoading(item.id, () =>
-      dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }))
-    );
+    dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }));
   };
 
+  // ➖ Decrement (NO loading)
   const handleDecrement = (item) => {
     if (item.quantity > 1) {
-      triggerLoading(item.id, () =>
-        dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1 }))
-      );
+      dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1 }));
     }
   };
 
+  // ❌ Remove (with loading)
   const handleRemove = (id) => {
-    triggerLoading(id, () => dispatch(removeFromCart(id)));
+    triggerRemoveLoading(id, () => dispatch(removeFromCart(id)));
   };
 
   return (
@@ -89,14 +91,12 @@ const CartDrawer = ({ isOpen, onClose, cartItems }) => {
                   return (
                     <div
                       key={item.id}
-                      className={`relative flex items-center justify-between mb-4 border-b pb-2 transition ${
-                        isLoading ? "opacity-90 blur-[0.5px]" : ""
-                      }`}
+                      className="relative flex items-center justify-between mb-4 border-b pb-2"
                     >
-                      {/* Loading Overlay */}
+                      {/* Remove Loading Overlay */}
                       {isLoading && (
                         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
-                          <div className="w-6 h-6 border-2 border-[#E47277] border-t-transparent rounded-full animate-spin opacity-100"></div>
+                          <div className="w-6 h-6 border-2 border-[#E47277] border-t-transparent rounded-full animate-spin"></div>
                         </div>
                       )}
 
@@ -114,7 +114,6 @@ const CartDrawer = ({ isOpen, onClose, cartItems }) => {
                           <div className="flex items-center gap-0 border w-[85px] rounded">
                             <button
                               onClick={() => handleDecrement(item)}
-                              disabled={isLoading}
                               className="px-2 py-0 border-r"
                             >
                               -
@@ -124,7 +123,6 @@ const CartDrawer = ({ isOpen, onClose, cartItems }) => {
                             </span>
                             <button
                               onClick={() => handleIncrement(item)}
-                              disabled={isLoading}
                               className="px-2 py-0 border-l"
                             >
                               +
@@ -138,7 +136,7 @@ const CartDrawer = ({ isOpen, onClose, cartItems }) => {
                         <p className="text-sm mt-1 font-thin">
                           Subtotal:{" "}
                           <span className="font-normal">
-                            ₹{item.product.price * item.quantity}.00
+                            ${item.product.price * item.quantity}.00
                           </span>
                         </p>
                         <button
