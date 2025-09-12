@@ -162,7 +162,7 @@ const CartDrawer = ({ isOpen, onClose, cartItems }) => {
               <div className="flex justify-between mb-3">
                 <span className="font-medium">Total</span>
                 <span className="font-bold text-lg text-[#E47277]">
-                  ₹{total}.00
+                  ${total}.00
                 </span>
               </div>
               <button
